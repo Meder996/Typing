@@ -1,0 +1,26 @@
+{
+  "name": "ielts-prep-hub",
+  "version": "1.0.0",
+  "description": "IELTS Prep Hub — 100% Client-Side Static & Interactive Web Application for IELTS Mastery",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./styles/input.css -o ./styles/app.css --minify",
+    "start": "python3 -m http.server 3000 --bind 0.0.0.0 --protocol HTTP/1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Meder996/Typing.git"
+  },
+  "keywords": [
+    "ielts",
+    "education",
+    "static-site",
+    "quiz-engine",
+    "speaking-simulator",
+    "writing-samples",
+    "idioms-vault"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
