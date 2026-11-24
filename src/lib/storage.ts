@@ -1,56 +1,59 @@
-import { addDays, startOfDay, toKey, weekdayIndex } from './date'
-import { ALL_DAYS, WEEKDAYS_ONLY, WEEKEND_ONLY } from '../constants'
-import type { AppState, Habit } from '../types'
+import type { Db, UserData } from '../types'
 
-const STORAGE_KEY = 'habitly.state.v1'
+const KEY = 'habitly.v2'
 
-/** Starter data so the app looks alive on first launch (mirrors the Figma sample habits). */
-export function createSeedState(): AppState {
-  const today = startOfDay(new Date())
-  const created = toKey(addDays(today, -30))
-
-  const seeds: Omit<Habit, 'id' | 'createdAt'>[] = [
-    { name: 'Set small goals', emoji: '🎯', color: 'coral', timeOfDay: 'morning', days: ALL_DAYS, reminder: '07:30' },
-    { name: 'Work', emoji: '🏆', color: 'lavender', timeOfDay: 'afternoon', days: WEEKDAYS_ONLY, reminder: '13:00' },
-    { name: 'Meditation', emoji: '🧘', color: 'mint', timeOfDay: 'morning', days: ALL_DAYS, reminder: '06:45' },
-    { name: 'Basketball', emoji: '🏀', color: 'peach', timeOfDay: 'evening', days: [0, 2, 4], reminder: '18:00' },
-    { name: 'Sleep over 8h', emoji: '😴', color: 'sky', timeOfDay: 'evening', days: ALL_DAYS, reminder: '22:30' },
-    { name: 'Playing games', emoji: '🎮', color: 'pink', timeOfDay: 'evening', days: WEEKEND_ONLY, reminder: '20:00' },
-  ]
-
-  const habits: Habit[] = seeds.map((s, i) => ({ ...s, id: `seed-${i + 1}`, createdAt: created }))
-
-  const completions: Record<string, string[]> = {}
-  habits.forEach((h, hi) => {
-    completions[h.id] = []
-    // Past 30 days only; today starts empty so the user has something to tap.
-    for (let i = 1; i <= 30; i++) {
-      const d = addDays(today, -i)
-      if (!h.days.includes(weekdayIndex(d))) continue
-      if ((i * 7 + hi * 3) % 5 !== 0) completions[h.id].push(toKey(d))
-    }
-  })
-
-  return { onboarded: false, name: '', theme: 'dark', habits, completions }
+/** A brand-new account: no habits, no check-ins, no moods. */
+export function emptyUser(name: string, email: string): UserData {
+  return {
+    profile: { name, email, phone: '', birthday: '' },
+    onboarded: false,
+    answers: {},
+    habits: [],
+    completions: {},
+    moods: {},
+    theme: 'dark',
+    language: 'English',
+    plan: null,
+    payment: null,
+    reminders: true,
+    analytics: false,
+    twoFactor: false,
+    linked: { google: false, apple: false, facebook: false },
+    board: [],
+  }
 }
 
-export function loadState(): AppState {
+export const emptyDb = (): Db => ({ sessionId: null, accounts: [], data: {} })
+
+export function loadDb(): Db {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    localStorage.removeItem('habitly.state.v1') // old demo data from the first version
+    const raw = localStorage.getItem(KEY)
     if (raw) {
-      const parsed = JSON.parse(raw) as AppState
-      if (Array.isArray(parsed.habits) && parsed.completions) return parsed
+      const parsed = JSON.parse(raw) as Db
+      if (Array.isArray(parsed.accounts) && parsed.data) return parsed
     }
   } catch {
-    /* corrupted storage – fall through to seed data */
+    /* corrupted storage – start clean */
   }
-  return createSeedState()
+  return emptyDb()
 }
 
-export function saveState(state: AppState): void {
+export function saveDb(db: Db): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    localStorage.setItem(KEY, JSON.stringify(db))
   } catch {
-    /* storage full or unavailable – app keeps working in memory */
+    /* storage unavailable – keep working in memory */
   }
+}
+
+/** SHA-256 password hash. Local-only demo: there is no server. */
+export async function hashPassword(password: string): Promise<string> {
+  if (globalThis.crypto?.subtle) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password))
+    return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('')
+  }
+  let h = 0
+  for (const c of password) h = (Math.imul(31, h) + c.charCodeAt(0)) | 0
+  return `fb${(h >>> 0).toString(16)}`
 }

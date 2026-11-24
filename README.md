@@ -1,38 +1,32 @@
-# Habitly – Habit Tracker
+# Habitly
 
-A mobile-first habit tracker web app inspired by the **Habitly – Habit Tracker App UI Kit** Figma design.
+A habit tracker for the web: daily habits with streak-free check-ins, mood logging, reports, a per-account whiteboard, and account settings. Built with React 19, TypeScript and Vite. Data is stored in the browser (localStorage), so there is no server.
 
-## Features
-
-- **Onboarding** – splash screen and name setup.
-- **Home** – habits grouped by Today / Weekly / Overall, filterable by Morning, Afternoon, and Evening. Tap a habit to mark it done; the weekly view lets you check off any day this week.
-- **Report** – best streak, completion rate, last-7-days bar chart, 30-day trend line, per-habit progress, and a monthly completion calendar.
-- **Habits** – list of all habits grouped by time of day; create, edit, or delete.
-- **Account** – display name, dark/light appearance, and a reset to demo data.
-
-Data is stored in `localStorage`, so it persists per browser.
-
-## Getting started
+## Run locally
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm run build    # type-check + production build
-npm run lint
+npm run build    # type-check + production build into dist/
 ```
 
-## Project structure
+## Features
 
-```
-src/
-  App.tsx            app shell, tabs, state updates
-  constants.ts       colors, emojis, weekday labels
-  types.ts           Habit / AppState types
-  index.css          design tokens (dark + light) and components
-  lib/
-    date.ts          local date helpers (Monday-first weeks)
-    habits.ts        completion, streak, and rate calculations
-    storage.ts       seed data + localStorage persistence
-  components/        Icons, Logo, TabBar, Onboarding, HabitForm
-  screens/           HomeScreen, StatsScreen, HabitsScreen, AccountScreen
-```
+- **Accounts (local):** sign up, log in, reset password with a 4-digit code. Each account has its own data; a new account starts empty.
+- **Home / Habits:** create, edit and check off habits by weekday, time of day and reminder.
+- **Mood and Report:** daily mood, monthly calendar, completion charts.
+- **Board:** a whiteboard section (like Miro, in a single tab): pen, rectangle, ellipse, arrow, sticky notes, text, eraser, pan and zoom, colours, undo/redo, delete, clear. Saved per account.
+- **Account:** profile, billing and Premium plan screens, achievements, security, preferences, help pages.
+
+## Layout
+
+- Wide screens: side navigation and a main column.
+- Phones: bottom tab bar.
+
+## Project layout
+
+- `src/App.tsx`: app state, navigation stack, web shells
+- `src/routes.tsx`: route → screen map
+- `src/screens/`: one file per screen (`board.tsx` is the whiteboard)
+- `src/lib/`: storage, habit maths, date helpers, board geometry
+- `src/index.css`: design tokens and all styles
